@@ -2,13 +2,14 @@ const Job = require("../models/jobs")
 const getLongitudeLatitudeFromFakeZipCode = require("../utils/geocoder")
 const ErrorHandler = require("../utils/errorHandler")
 const catchAsyncErrors = require("../middleware/catchAsyncError")
-
+const APIFilters = require("../utils/apiFilters")
 
 
 
 
 //  get single job => /api/v1/job/:id/:slug
 exports.getJob = catchAsyncErrors(async (req, res, next) => {
+
     const job = await Job.find({ $and: [{ _id: req.params.id }, { slug: req.params.slug }] });
 
     if (!job || job.length === 0) {
@@ -29,7 +30,9 @@ exports.getJob = catchAsyncErrors(async (req, res, next) => {
 
 //  get all jobs => /api/v1/jobs
 exports.getJobs = catchAsyncErrors(async (req, res, next) => {
-    const jobs = await Job.find();
+
+    const apiFilters = new APIFilters(Job.find(), req.query).filter()
+    const jobs = await apiFilters.query;
 
     res.status(200).json({
         success: 200,
@@ -40,7 +43,6 @@ exports.getJobs = catchAsyncErrors(async (req, res, next) => {
 // create a new job => /api/v1/job/new
 
 exports.newJob = catchAsyncErrors(async (req, res, next) => {
-    console.log("New job trigger" + req.body);
     const job = await Job.create(req.body);
 
     res.status(200).json({
@@ -79,7 +81,6 @@ exports.getJobsInRadius = catchAsyncErrors(async (req, res, next) => {
 
 exports.updateJob = catchAsyncErrors(async (req, res, next) => {
 
-    console.log(req)
     let job = await Job.findById(req.params.id);
 
     if (!job) {
