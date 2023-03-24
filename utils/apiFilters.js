@@ -9,7 +9,7 @@ class APIFilters {
         const queryCopy = {...this.queryStr};
 
         // removing fields from the query
-        const removeFields = ['sort', 'fields'];
+        const removeFields = ['sort', 'fields', 'q'];
         removeFields.forEach(el => delete queryCopy[el]);
 
 
@@ -40,6 +40,16 @@ class APIFilters {
         }else {
             this.query = this.query.select('-__v')
         }
+
+        return this;
+    }
+
+    searchByQuery(){
+        if(this.queryStr.q){
+            const qu = this.queryStr.q.split("-").join(" ");
+            this.query = this.query.find({$text: {$search: "\""+ qu +"\""}})
+        }
+
 
         return this;
     }
