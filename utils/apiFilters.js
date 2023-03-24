@@ -9,7 +9,7 @@ class APIFilters {
         const queryCopy = {...this.queryStr};
 
         // removing fields from the query
-        const removeFields = ['sort'];
+        const removeFields = ['sort', 'fields'];
         removeFields.forEach(el => delete queryCopy[el]);
 
 
@@ -28,6 +28,17 @@ class APIFilters {
             this.query = this.query.sort(sortBy)
         }else {
             this.query = this.query.sort('-postingDate')
+        }
+
+        return this;
+    }
+
+    limitFields(){
+        if(this.queryStr.fields){
+            const fields = this.queryStr.fields.split(",").join(" ");
+            this.query = this.query.select(fields)
+        }else {
+            this.query = this.query.select('-__v')
         }
 
         return this;
