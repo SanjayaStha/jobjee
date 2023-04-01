@@ -6,6 +6,12 @@ const app = express();
 const dotenv = require("dotenv")
 const cookieParser = require("cookie-parser")
 const fileUpload = require("express-fileupload")
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet")
+const mongoSanitize = require("express-mongo-sanitize")
+const xssClean = require("xss-clean")
+const hpp = require("hpp");
+const cors = require("cors");
 
 const errorMiddleware = require("./middleware/error")
 const ErrorHandler = require("./utils/errorHandler")
@@ -34,6 +40,30 @@ app.use(cookieParser())
 
 // handle file uploads
 app.use(fileUpload())
+
+// sanitize data
+app.use(mongoSanitize()) 
+
+//  prevent xss attacks
+app.use(xssClean())
+
+// prevent parameter pollution
+app.use(hpp({
+    whitelist: ['postitions']
+}))
+
+// setup security headers
+app.use(helmet())
+
+// rate limiting
+const limiter = rateLimit({
+    windowMs: 10*60*1000,
+    max: 100
+})
+app.use(limiter);
+
+// setup cors accessible by other domains
+app.use(cors());
 
 // "api/v1", 
 app.use("/api/v1", jobs)
